@@ -1,0 +1,20 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: coverage-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/coverage_db
+    username: postgres
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+api:
+  colombia:
+    url: https://api-colombia.com/api/v1/City
