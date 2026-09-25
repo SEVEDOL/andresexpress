@@ -1,0 +1,28 @@
+server:
+  port: ${SERVER_PORT:8083}
+
+spring:
+  application:
+    name: notifications-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/notifications_db}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    # Credenciales SOLO por variables de entorno (nunca escritas aqui):
+    #   MAIL_USERNAME = correo de Gmail del proyecto
+    #   MAIL_PASSWORD = contrasena de aplicacion de Gmail
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
