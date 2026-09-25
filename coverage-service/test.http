@@ -1,8 +1,0 @@
-POST http://localhost:8081/api/v1/coverage/validate
-Content-Type: application/json
-
-{
-  "originCity": "Duitama",
-  "destinationCity": "tunja",
-  "weight": 3
-}
