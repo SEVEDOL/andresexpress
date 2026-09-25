@@ -1,0 +1,10 @@
+[
+  {
+    "IndexName": "GSI_Department",
+    "KeySchema": [
+      { "AttributeName": "GSI_PK", "KeyType": "HASH" },
+      { "AttributeName": "GSI_SK", "KeyType": "RANGE" }
+    ],
+    "Projection": { "ProjectionType": "ALL" }
+  }
+]

@@ -1,0 +1,19 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: coverage-service
+
+aws:
+  region: us-east-1
+  dynamodb:
+    endpoint: http://localhost:8000
+    tableName: coverage_cities
+  credentials:
+    access-key: fakeMyKeyId
+    secret-key: fakeSecretAccessKey
+
+api:
+  colombia:
+    url: https://api-colombia.com/api/v1/City
