@@ -16,3 +16,6 @@ server:
 coverage:
   url: ${COVERAGE_URL:http://localhost:8081}
   timeout-ms: ${COVERAGE_TIMEOUT_MS:3000}
+notifications:
+  url: ${NOTIFICATIONS_URL:http://localhost:8083}
+  timeout-ms: ${NOTIFICATIONS_TIMEOUT_MS:3000}
