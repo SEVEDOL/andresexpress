@@ -1,6 +1,7 @@
 package com.andesexpress.coverage.infrastructure.config;
 
 import com.andesexpress.coverage.domain.exception.CityNotFoundException;
+import com.andesexpress.coverage.domain.exception.ExternalServiceUnavailableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CityNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleCityNotFound(CityNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ExternalServiceUnavailableException.class)
+    public ResponseEntity<Map<String, String>> handleExternalUnavailable(ExternalServiceUnavailableException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(Map.of("error", ex.getMessage()));
     }
 }

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andes Express - Envíos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>📦 Andes Express</h1>
+
+    <!-- Crear pedido (HU-01) -->
+    <div class="card">
+        <h2>Crear pedido</h2>
+        <form id="orderForm">
+            <div class="row">
+                <div class="form-group">
+                    <label for="originCity">Ciudad de origen</label>
+                    <input type="text" id="originCity" required placeholder="Ej. Medellín">
+                </div>
+                <div class="form-group">
+                    <label for="destinationCity">Ciudad de destino</label>
+                    <input type="text" id="destinationCity" required placeholder="Ej. Sogamoso">
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label for="weight">Peso (kg)</label>
+                    <input type="number" step="0.1" min="0.1" id="weight" required placeholder="Ej. 3.5">
+                </div>
+                <div class="form-group">
+                    <label for="shipmentType">Tipo de envío</label>
+                    <select id="shipmentType" required>
+                        <option value="STANDARD">Estándar</option>
+                        <option value="EXPRESS">Exprés</option>
+                    </select>
+                </div>
+            </div>
+
+            <h3>Remitente</h3>
+            <div class="row">
+                <div class="form-group">
+                    <label for="senderName">Nombre</label>
+                    <input type="text" id="senderName" required placeholder="Ej. Carlos Pérez">
+                </div>
+                <div class="form-group">
+                    <label for="senderPhone">Teléfono</label>
+                    <input type="tel" id="senderPhone" required placeholder="Ej. 3001234567">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="senderEmail">Correo (aquí llega la confirmación)</label>
+                <input type="email" id="senderEmail" required placeholder="Ej. correo@gmail.com">
+            </div>
+
+            <h3>Destinatario</h3>
+            <div class="row">
+                <div class="form-group">
+                    <label for="recipientName">Nombre</label>
+                    <input type="text" id="recipientName" required placeholder="Ej. Ana Gómez">
+                </div>
+                <div class="form-group">
+                    <label for="recipientPhone">Teléfono</label>
+                    <input type="tel" id="recipientPhone" required placeholder="Ej. 3107654321">
+                </div>
+            </div>
+
+            <button type="submit" id="createButton">Crear pedido</button>
+        </form>
+        <div id="createResult" class="result hidden"></div>
+    </div>
+
+    <!-- Consultar guía (HU-07 / RF-12) -->
+    <div class="card">
+        <h2>Consultar guía</h2>
+        <form id="guideForm" class="inline-form">
+            <input type="text" id="guideNumber" required placeholder="Ej. ANDES-48213907">
+            <button type="submit" id="guideButton">Consultar</button>
+        </form>
+        <div id="guideResult" class="result hidden"></div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
