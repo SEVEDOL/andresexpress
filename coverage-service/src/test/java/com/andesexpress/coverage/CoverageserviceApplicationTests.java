@@ -1,4 +1,4 @@
-package com.andesexpress.coverageservice;
+package com.andesexpress.coverage;
 
 import com.andesexpress.coverage.CoverageserviceApplication;
 import org.junit.jupiter.api.Test;
