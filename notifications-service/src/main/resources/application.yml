@@ -4,14 +4,6 @@ server:
 spring:
   application:
     name: notifications-service
-  datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/notifications_db}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:postgres}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    open-in-view: false
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
@@ -26,3 +18,13 @@ spring:
           auth: true
           starttls:
             enable: true
+
+aws:
+  region: ${AWS_REGION:us-east-1}
+  dynamodb:
+    # Local: http://localhost:8000 (DynamoDB Local). En AWS se deja vacio.
+    endpoint: ${DYNAMODB_ENDPOINT:}
+    create-tables: ${DYNAMODB_CREATE_TABLES:true}
+
+notifications:
+  table-name: ${NOTIFICATIONS_TABLE:notifications-log}

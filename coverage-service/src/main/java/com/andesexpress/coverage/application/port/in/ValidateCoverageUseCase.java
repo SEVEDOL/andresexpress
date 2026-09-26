@@ -1,7 +1,7 @@
 package com.andesexpress.coverage.application.port.in;
 
-import com.andesexpress.coverage.domain.model.TariffDomain;
+import com.andesexpress.coverage.domain.model.TariffResult;
 
 public interface ValidateCoverageUseCase {
-    TariffDomain validateAndCalculate(String originCity, String destinationCity, Double weight);
+    TariffResult validateAndCalculate(String originCity, String destinationCity, Double weight);
 }

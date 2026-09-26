@@ -7,7 +7,6 @@ import com.andesexpress.notifications.application.port.out.NotificationRepositor
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -18,25 +17,31 @@ public class NotificationServiceImpl implements SendNotificationUseCase {
     private final MailSenderPort mailSenderPort;
 
     @Override
-    @Transactional
     public void processNotification(OrderCreatedEventCommand command) {
-        // Regla de Idempotencia
-        if (notificationRepositoryPort.existsByEventId(command.getEventId())) {
+        if (command.getEventId() == null || command.getEventId().isBlank()) {
+            throw new IllegalArgumentException("El evento no trae eventId");
+        }
+
+        // Regla de idempotencia (RF-11): registrar PRIMERO, de forma atomica.
+        // Si dos copias del mismo evento llegan al mismo tiempo, solo una logra registrarse.
+        boolean registered = notificationRepositoryPort.tryRegister(command.getEventId(), command.getSenderEmail());
+        if (!registered) {
             log.warn("El evento con ID {} ya fue procesado previamente. Descartando notificación duplicada.", command.getEventId());
             return;
         }
 
         log.info("Procesando notificación para el evento ID: {}", command.getEventId());
 
-        // Enviar correo
-        String subject = "Confirmación de Envío - Andes Express";
-        String body = buildEmailBody(command);
+        try {
+            mailSenderPort.sendEmail(command.getSenderEmail(), "Confirmación de Envío - Andes Express", buildEmailBody(command));
+        } catch (RuntimeException e) {
+            // Si el correo falla, se libera el registro para que el evento pueda reintentarse.
+            notificationRepositoryPort.release(command.getEventId());
+            throw e;
+        }
 
-        mailSenderPort.sendEmail(command.getSenderEmail(), subject, body);
-
-        // Registrar como procesado
-        notificationRepositoryPort.saveProcessedEvent(command.getEventId());
-        log.info("Evento ID {} registrado exitosamente en la base de datos de auditoría.", command.getEventId());
+        notificationRepositoryPort.markAsSent(command.getEventId());
+        log.info("Evento ID {} registrado como enviado en el log de notificaciones.", command.getEventId());
     }
 
     /** Cuerpo del correo con la misma informacion de la guia (RF-10). */

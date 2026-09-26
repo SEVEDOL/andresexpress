@@ -1,8 +1,14 @@
 package com.andesexpress.coverage.domain.model;
 
-import java.math.BigDecimal;
 import lombok.Getter;
 
+import java.math.BigDecimal;
+
+/**
+ * Reglas de negocio de la tarifa (sin dependencias externas).
+ * - La ZONA se decide aqui (misma ciudad, mismo departamento, resto del pais).
+ * - Los VALORES de cada zona vienen de afuera (ZoneTariff, guardado en DynamoDB).
+ */
 @Getter
 public class TariffDomain {
 
@@ -20,25 +26,20 @@ public class TariffDomain {
         this.weight = weight;
     }
 
-    public BigDecimal calculateTotalCost() {
-        BigDecimal baseTariff;
-
-        // Regla 1: Tarifa Base según ubicación
+    public Zone determineZone() {
         if (originCity.equalsIgnoreCase(destinationCity)) {
-            baseTariff = new BigDecimal("10000");
-        } else if (originDepartment.equalsIgnoreCase(destinationDepartment)) {
-            baseTariff = new BigDecimal("15000");
-        } else {
-            baseTariff = new BigDecimal("25000");
+            return Zone.SAME_CITY;
         }
-
-        // Regla 2: Recargo por peso si supera los 2.0 kg ($2.000 COP por kg excedente)
-        BigDecimal excessCharge = BigDecimal.ZERO;
-        if (weight > 2.0) {
-            double excessWeight = weight - 2.0;
-            excessCharge = BigDecimal.valueOf(excessWeight * 2000);
+        if (originDepartment.equalsIgnoreCase(destinationDepartment)) {
+            return Zone.SAME_DEPARTMENT;
         }
+        return Zone.REST_OF_COUNTRY;
+    }
 
-        return baseTariff.add(excessCharge);
+    /** Tarifa = base de la zona + recargo por cada kg que supere los kilos incluidos. */
+    public BigDecimal calculateTotalCost(ZoneTariff rate) {
+        BigDecimal weightKg = BigDecimal.valueOf(weight);
+        BigDecimal excessKg = weightKg.subtract(rate.includedKg()).max(BigDecimal.ZERO);
+        return rate.baseTariff().add(excessKg.multiply(rate.extraKgRate()));
     }
 }

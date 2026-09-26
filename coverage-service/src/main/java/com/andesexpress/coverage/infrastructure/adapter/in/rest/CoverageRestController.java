@@ -1,7 +1,7 @@
 package com.andesexpress.coverage.infrastructure.adapter.in.rest;
 
 import com.andesexpress.coverage.application.port.in.ValidateCoverageUseCase;
-import com.andesexpress.coverage.domain.model.TariffDomain;
+import com.andesexpress.coverage.domain.model.TariffResult;
 import com.andesexpress.coverage.infrastructure.adapter.in.rest.dto.TariffResultDTO;
 import com.andesexpress.coverage.infrastructure.adapter.in.rest.dto.ValidateCoverageDTO;
 import jakarta.validation.Valid;
@@ -18,19 +18,19 @@ public class CoverageRestController {
 
     @PostMapping("/validate")
     public ResponseEntity<TariffResultDTO> validateCoverage(@Valid @RequestBody ValidateCoverageDTO dto) {
-        TariffDomain domain = validateCoverageUseCase.validateAndCalculate(
+        TariffResult result = validateCoverageUseCase.validateAndCalculate(
                 dto.getOriginCity(),
                 dto.getDestinationCity(),
                 dto.getWeight()
         );
 
         TariffResultDTO response = TariffResultDTO.builder()
-                .originCity(domain.getOriginCity())
-                .destinationCity(domain.getDestinationCity())
-                .originDepartment(domain.getOriginDepartment())
-                .destinationDepartment(domain.getDestinationDepartment())
-                .weight(domain.getWeight())
-                .totalTariff(domain.calculateTotalCost())
+                .originCity(result.originCity())
+                .destinationCity(result.destinationCity())
+                .originDepartment(result.originDepartment())
+                .destinationDepartment(result.destinationDepartment())
+                .weight(result.weight())
+                .totalTariff(result.totalTariff())
                 .build();
 
         return ResponseEntity.ok(response);
