@@ -4,24 +4,25 @@ import com.andresexpress.orders.application.port.out.EventPublisherPort;
 import com.andresexpress.orders.domain.model.OrderDomain;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 
 /**
- * Publica el evento "pedido creado" llamando por HTTP al microservicio Notifications.
- * Es una version LOCAL: en AWS se reemplazara por un adaptador que publique en SNS/SQS,
- * sin tocar el caso de uso (solo cambia este adaptador).
+ * Alternativa SIN cola: llama por HTTP a Notifications y espera a que envie el correo.
+ * Solo se usa con events.publisher=http (por ejemplo, en local sin Docker).
+ * Por defecto se publica en SQS (SqsEventPublisherAdapter).
  *
  * Si Notifications no responde, lanza la excepcion; CreateOrderService la captura y
  * el pedido queda creado igual (RN-10).
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "events.publisher", havingValue = "http")
 public class NotificationsHttpEventPublisherAdapter implements EventPublisherPort {
 
     private final RestClient notificationsClient;
@@ -39,50 +40,13 @@ public class NotificationsHttpEventPublisherAdapter implements EventPublisherPor
 
     @Override
     public void publishOrderCreated(OrderDomain order) {
-        OrderCreatedEvent event = new OrderCreatedEvent(
-                // Un pedido = un evento: usar el orderId como eventId permite que
-                // Notifications descarte duplicados (idempotencia).
-                order.getOrderId().toString(),
-                order.getSenderEmail(),
-                order.getSenderName(),
-                order.getSenderPhone(),
-                order.getPlainTrackingNumber(),
-                order.getRecipientName(),
-                order.getRecipientPhone(),
-                order.getOriginCity(),
-                order.getOriginDepartment(),
-                order.getDestinationCity(),
-                order.getDestinationDepartment(),
-                order.getWeight(),
-                order.getShipmentType() != null ? order.getShipmentType().name() : null,
-                order.getTotalTariff()
-        );
-
         notificationsClient.post()
                 .uri("/api/v1/notifications/simulate")
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(event)
+                .body(OrderCreatedEvent.from(order))
                 .retrieve()
                 .toBodilessEntity();
 
         log.info("Evento OrderCreated enviado a Notifications para el pedido {}", order.getOrderId());
-    }
-
-    /** Contrato del evento: mismos nombres de campo que OrderCreatedEventCommand en Notifications. */
-    public record OrderCreatedEvent(
-            String eventId,
-            String senderEmail,
-            String senderName,
-            String senderPhone,
-            String plainTrackingNumber,
-            String recipientName,
-            String recipientPhone,
-            String originCity,
-            String originDepartment,
-            String destinationCity,
-            String destinationDepartment,
-            Double weight,
-            String shipmentType,
-            BigDecimal totalTariff) {
     }
 }

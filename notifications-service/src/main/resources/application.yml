@@ -25,6 +25,16 @@ aws:
     # Local: http://localhost:8000 (DynamoDB Local). En AWS se deja vacio.
     endpoint: ${DYNAMODB_ENDPOINT:}
     create-tables: ${DYNAMODB_CREATE_TABLES:true}
+  sqs:
+    # Cola donde Orders publica el evento "pedido creado" (RT-05)
+    listener-enabled: ${SQS_LISTENER_ENABLED:true}
+    # Local: http://localhost:9324 (ElasticMQ en Docker). En AWS se deja vacio.
+    endpoint: ${SQS_ENDPOINT:}
+    order-created-queue: ${ORDER_CREATED_QUEUE:order-created}
+    # Crea la cola y su DLQ (order-created-dlq) si no existen
+    create-queue: ${SQS_CREATE_QUEUE:true}
+    # Correos que se envian en paralelo
+    concurrency: ${SQS_CONCURRENCY:5}
 
 notifications:
   table-name: ${NOTIFICATIONS_TABLE:notifications-log}

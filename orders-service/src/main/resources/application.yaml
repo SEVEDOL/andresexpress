@@ -17,6 +17,22 @@ coverage:
   url: ${COVERAGE_URL:http://localhost:8081}
   # 5 s: si Coverage arranca sin las listas de API Colombia en cache, descargarlas tarda ~3,1 s
   timeout-ms: ${COVERAGE_TIMEOUT_MS:5000}
+
+# Como se publica el evento "pedido creado":
+#   sqs  (por defecto) -> cola SQS; Orders no espera el correo (RT-05)
+#   http               -> llamada directa a Notifications (sin cola, espera el correo)
+events:
+  publisher: ${EVENTS_PUBLISHER:sqs}
+
+aws:
+  region: ${AWS_REGION:us-east-1}
+  sqs:
+    # Local: http://localhost:9324 (ElasticMQ en Docker). En AWS se deja vacio.
+    endpoint: ${SQS_ENDPOINT:}
+    order-created-queue: ${ORDER_CREATED_QUEUE:order-created}
+    create-queue: ${SQS_CREATE_QUEUE:true}
+
+# Solo se usa con events.publisher=http
 notifications:
   url: ${NOTIFICATIONS_URL:http://localhost:8083}
   timeout-ms: ${NOTIFICATIONS_TIMEOUT_MS:3000}
