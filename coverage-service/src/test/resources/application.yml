@@ -7,3 +7,8 @@ aws:
 
 coverage:
   tariffs-table: coverage-tariffs
+
+# Los tests no deben llamar a la API Colombia real al arrancar
+api:
+  colombia:
+    warm-up: false

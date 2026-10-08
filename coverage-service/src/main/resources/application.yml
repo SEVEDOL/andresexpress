@@ -22,3 +22,8 @@ api:
     connect-timeout-ms: ${API_COLOMBIA_CONNECT_TIMEOUT_MS:5000}
     read-timeout-ms: ${API_COLOMBIA_READ_TIMEOUT_MS:15000}
     cache-minutes: ${API_COLOMBIA_CACHE_MINUTES:60}
+    # Reintentos ante 429 o 5xx cuando aun no hay listas en cache (espera 1 s, 2 s, 4 s)
+    max-retries: ${API_COLOMBIA_MAX_RETRIES:3}
+    retry-backoff-ms: ${API_COLOMBIA_RETRY_BACKOFF_MS:1000}
+    # Descargar las listas al arrancar, antes de la primera cotizacion
+    warm-up: ${API_COLOMBIA_WARM_UP:true}
