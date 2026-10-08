@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -32,6 +33,7 @@ import java.util.regex.Pattern;
 public class ApiColombiaAdapter implements ApiColombiaPort {
 
     private static final Pattern DIACRITICS = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+    private static final Pattern DISTRITO_CAPITAL = Pattern.compile(",?\\s*d\\.?\\s*c\\.?$");
 
     private final RestTemplate restTemplate;
     private final String apiUrl;
@@ -105,18 +107,29 @@ public class ApiColombiaAdapter implements ApiColombiaPort {
         }
     }
 
-    private boolean matchesCityName(String apiName, String requestedName) {
-        String normalizedApiName = normalizeCityName(apiName).trim();
-        String normalizedRequestedName = normalizeCityName(requestedName).trim();
-        return normalizedApiName.equalsIgnoreCase(normalizedRequestedName)
-                || normalizedApiName.toLowerCase().startsWith(normalizedRequestedName.toLowerCase() + " ");
+    /**
+     * Compara el nombre completo (RF-03, RN-05): un nombre parcial como "San" no debe
+     * coincidir con "San Francisco".
+     */
+    static boolean matchesCityName(String apiName, String requestedName) {
+        String normalizedRequestedName = normalizeCityName(requestedName);
+        return !normalizedRequestedName.isEmpty()
+                && normalizeCityName(apiName).equals(normalizedRequestedName);
     }
 
-    private String normalizeCityName(String input) {
+    /**
+     * Sin tildes, en minusculas y con espacios simples. Quita el sufijo "D.C." para que
+     * "Bogota" coincida con "Bogotá D.C.", el unico nombre de API Colombia que lo trae.
+     */
+    static String normalizeCityName(String input) {
         if (input == null) {
             return "";
         }
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
-        return DIACRITICS.matcher(normalized).replaceAll("");
+        normalized = DIACRITICS.matcher(normalized).replaceAll("")
+                .toLowerCase(Locale.ROOT)
+                .trim()
+                .replaceAll("\\s+", " ");
+        return DISTRITO_CAPITAL.matcher(normalized).replaceAll("");
     }
 }
