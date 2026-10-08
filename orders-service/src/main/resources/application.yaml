@@ -15,7 +15,8 @@ server:
 
 coverage:
   url: ${COVERAGE_URL:http://localhost:8081}
-  timeout-ms: ${COVERAGE_TIMEOUT_MS:3000}
+  # 5 s: si Coverage arranca sin las listas de API Colombia en cache, descargarlas tarda ~3,1 s
+  timeout-ms: ${COVERAGE_TIMEOUT_MS:5000}
 notifications:
   url: ${NOTIFICATIONS_URL:http://localhost:8083}
   timeout-ms: ${NOTIFICATIONS_TIMEOUT_MS:3000}
