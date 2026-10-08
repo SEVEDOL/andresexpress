@@ -27,7 +27,9 @@ public class TariffDomain {
     }
 
     public Zone determineZone() {
-        if (originCity.equalsIgnoreCase(destinationCity)) {
+        // El nombre solo no basta: Rionegro (Antioquia) y Rionegro (Santander) son ciudades distintas.
+        if (originCity.equalsIgnoreCase(destinationCity)
+                && originDepartment.equalsIgnoreCase(destinationDepartment)) {
             return Zone.SAME_CITY;
         }
         if (originDepartment.equalsIgnoreCase(destinationDepartment)) {

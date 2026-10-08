@@ -23,12 +23,14 @@ public class ValidateCoverageService implements ValidateCoverageUseCase {
     private final TariffRatePort tariffRatePort;
 
     @Override
-    public TariffResult validateAndCalculate(String originCity, String destinationCity, Double weight) {
-        // 1. Validar ciudades contra la fuente oficial (API Colombia)
-        CityData origin = apiColombiaPort.fetchCityByName(originCity)
-                .orElseThrow(() -> new CityNotFoundException(originCity));
-        CityData destination = apiColombiaPort.fetchCityByName(destinationCity)
-                .orElseThrow(() -> new CityNotFoundException(destinationCity));
+    public TariffResult validateAndCalculate(String originCity, String originDepartment,
+                                             String destinationCity, String destinationDepartment,
+                                             Double weight) {
+        // 1. Validar ciudad y departamento contra la fuente oficial (API Colombia)
+        CityData origin = apiColombiaPort.fetchCity(originCity, originDepartment)
+                .orElseThrow(() -> new CityNotFoundException(originCity, originDepartment));
+        CityData destination = apiColombiaPort.fetchCity(destinationCity, destinationDepartment)
+                .orElseThrow(() -> new CityNotFoundException(destinationCity, destinationDepartment));
 
         // 2. Reglas de negocio: determinar la zona
         TariffDomain tariff = new TariffDomain(

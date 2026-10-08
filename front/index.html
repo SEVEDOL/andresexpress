@@ -16,8 +16,22 @@
         <form id="orderForm">
             <div class="row">
                 <div class="form-group">
+                    <label for="originDepartment">Departamento de origen</label>
+                    <select id="originDepartment" required>
+                        <option value="">Seleccione…</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="originCity">Ciudad de origen</label>
                     <input type="text" id="originCity" required placeholder="Ej. Medellín">
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label for="destinationDepartment">Departamento de destino</label>
+                    <select id="destinationDepartment" required>
+                        <option value="">Seleccione…</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="destinationCity">Ciudad de destino</label>

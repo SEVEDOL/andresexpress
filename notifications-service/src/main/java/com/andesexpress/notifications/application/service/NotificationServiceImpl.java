@@ -50,8 +50,8 @@ public class NotificationServiceImpl implements SendNotificationUseCase {
         return "Hola " + valueOrDash(c.getSenderName()) + ",\n\n"
                 + "Tu pedido ha sido creado exitosamente.\n\n"
                 + "Numero de guia: " + valueOrDash(c.getPlainTrackingNumber()) + "\n"
-                + "Origen: " + valueOrDash(c.getOriginCity()) + "\n"
-                + "Destino: " + valueOrDash(c.getDestinationCity()) + "\n"
+                + "Origen: " + place(c.getOriginCity(), c.getOriginDepartment()) + "\n"
+                + "Destino: " + place(c.getDestinationCity(), c.getDestinationDepartment()) + "\n"
                 + "Peso (kg): " + valueOrDash(c.getWeight()) + "\n"
                 + "Tipo de envio: " + valueOrDash(c.getShipmentType()) + "\n"
                 + "Tarifa (COP): " + valueOrDash(c.getTotalTariff()) + "\n"
@@ -59,6 +59,11 @@ public class NotificationServiceImpl implements SendNotificationUseCase {
                 + "Destinatario: " + valueOrDash(c.getRecipientName()) + " - " + valueOrDash(c.getRecipientPhone()) + "\n\n"
                 + "Si no recibes este correo, puedes consultar tu guia en la plataforma con su numero.\n\n"
                 + "Gracias por confiar en Andes Express.";
+    }
+
+    /** "Rionegro, Santander": el departamento distingue municipios con el mismo nombre. */
+    private String place(String city, String department) {
+        return department == null ? valueOrDash(city) : valueOrDash(city) + ", " + department;
     }
 
     private String valueOrDash(Object value) {

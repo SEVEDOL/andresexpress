@@ -30,6 +30,10 @@ public class OrderEntity {
     @Column(nullable = false)
     private String destinationCity;
 
+    // Sin nullable = false: los pedidos creados antes de este cambio no tienen departamento.
+    private String originDepartment;
+    private String destinationDepartment;
+
     @Column(nullable = false)
     private Double weight;
 

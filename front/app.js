@@ -6,6 +6,23 @@ const API_BASE = (location.hostname === 'localhost' || location.hostname === '12
 
 const SHIPMENT_LABELS = { STANDARD: 'Estándar', EXPRESS: 'Exprés' };
 
+// Nombres oficiales de API Colombia (/Department). El departamento es obligatorio porque
+// hay municipios con el mismo nombre en varios departamentos (ej. Rionegro).
+const DEPARTMENTS = [
+    'Amazonas', 'Antioquia', 'Arauca', 'Atlántico', 'Bogotá', 'Bolívar', 'Boyacá', 'Caldas',
+    'Caquetá', 'Casanare', 'Cauca', 'Cesar', 'Chocó', 'Córdoba', 'Cundinamarca', 'Guainía',
+    'Guaviare', 'Huila', 'La Guajira', 'Magdalena', 'Meta', 'Nariño', 'Norte de Santander',
+    'Putumayo', 'Quindío', 'Risaralda', 'San Andrés y Providencia', 'Santander', 'Sucre',
+    'Tolima', 'Valle del Cauca', 'Vaupés', 'Vichada'
+];
+
+for (const id of ['originDepartment', 'destinationDepartment']) {
+    const select = document.getElementById(id);
+    for (const name of DEPARTMENTS) {
+        select.add(new Option(name, name));
+    }
+}
+
 // Evita que texto escrito por el usuario se interprete como HTML.
 function esc(value) {
     return String(value ?? '-')
@@ -15,6 +32,11 @@ function esc(value) {
 
 function money(value) {
     return value == null ? '-' : '$' + Number(value).toLocaleString('es-CO') + ' COP';
+}
+
+// Los pedidos anteriores a este cambio no tienen departamento guardado.
+function place(city, department) {
+    return department ? `${city}, ${department}` : city;
 }
 
 function show(element, html, type) {
@@ -40,7 +62,9 @@ document.getElementById('orderForm').addEventListener('submit', async (e) => {
 
     const data = {
         originCity: document.getElementById('originCity').value.trim(),
+        originDepartment: document.getElementById('originDepartment').value,
         destinationCity: document.getElementById('destinationCity').value.trim(),
+        destinationDepartment: document.getElementById('destinationDepartment').value,
         weight: parseFloat(document.getElementById('weight').value),
         shipmentType: document.getElementById('shipmentType').value,
         senderName: document.getElementById('senderName').value.trim(),
@@ -103,8 +127,8 @@ document.getElementById('guideForm').addEventListener('submit', async (e) => {
         show(result, `
             <p><strong>Guía ${esc(w.trackingNumber)}</strong> · ${esc(w.status)}</p>
             <table>
-                <tr><th>Origen</th><td>${esc(w.originCity)}</td></tr>
-                <tr><th>Destino</th><td>${esc(w.destinationCity)}</td></tr>
+                <tr><th>Origen</th><td>${esc(place(w.originCity, w.originDepartment))}</td></tr>
+                <tr><th>Destino</th><td>${esc(place(w.destinationCity, w.destinationDepartment))}</td></tr>
                 <tr><th>Peso</th><td>${esc(w.weight)} kg</td></tr>
                 <tr><th>Tipo de envío</th><td>${esc(SHIPMENT_LABELS[w.shipmentType] || w.shipmentType)}</td></tr>
                 <tr><th>Tarifa</th><td>${esc(money(w.totalTariff))}</td></tr>

@@ -12,7 +12,8 @@ public final class OrderRestMapper {
     }
 
     public static CreateOrderCommand toCommand(CreateOrderRequest r) {
-        return new CreateOrderCommand(r.originCity(), r.destinationCity(), r.weight(), r.shipmentType(),
+        return new CreateOrderCommand(r.originCity(), r.originDepartment(), r.destinationCity(),
+                r.destinationDepartment(), r.weight(), r.shipmentType(),
                 r.senderName(), r.senderEmail(), r.senderPhone(), r.recipientName(), r.recipientPhone());
     }
 
@@ -21,7 +22,8 @@ public final class OrderRestMapper {
     }
 
     public static WaybillResponse toWaybillResponse(OrderDomain o, String trackingNumber) {
-        return new WaybillResponse(trackingNumber.trim().toUpperCase(), o.getOriginCity(), o.getDestinationCity(),
+        return new WaybillResponse(trackingNumber.trim().toUpperCase(), o.getOriginCity(), o.getOriginDepartment(),
+                o.getDestinationCity(), o.getDestinationDepartment(),
                 o.getWeight(), o.getShipmentType().name(), o.getTotalTariff(), o.getSenderName(),
                 o.getSenderPhone(), o.getRecipientName(), o.getRecipientPhone(), o.getStatus().name(),
                 o.getCreatedAt());

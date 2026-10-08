@@ -24,12 +24,16 @@ public class CreateOrderService implements CreateOrderUseCase {
     public OrderDomain createOrder(CreateOrderCommand command) {
         // 1. Validar ciudades y calcular tarifa (si falla, lanza excepción y no se guarda nada)
         TariffResult tariff = coverageServicePort.validateAndCalculateTariff(
-                command.originCity(), command.destinationCity(), command.weight());
+                command.originCity(), command.originDepartment(),
+                command.destinationCity(), command.destinationDepartment(), command.weight());
 
-        // 2. Armar el pedido y confirmarlo (id, guía, hash, estado)
+        // 2. Armar el pedido y confirmarlo (id, guía, hash, estado).
+        //    Se guardan los nombres oficiales que devolvió Coverage, no los que escribió el cliente.
         OrderDomain order = OrderDomain.builder()
-                .originCity(command.originCity())
-                .destinationCity(command.destinationCity())
+                .originCity(tariff.originCity())
+                .originDepartment(tariff.originDepartment())
+                .destinationCity(tariff.destinationCity())
+                .destinationDepartment(tariff.destinationDepartment())
                 .weight(command.weight())
                 .shipmentType(command.shipmentType())
                 .senderName(command.senderName())

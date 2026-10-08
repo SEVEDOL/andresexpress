@@ -20,7 +20,9 @@ public class CoverageRestController {
     public ResponseEntity<TariffResultDTO> validateCoverage(@Valid @RequestBody ValidateCoverageDTO dto) {
         TariffResult result = validateCoverageUseCase.validateAndCalculate(
                 dto.getOriginCity(),
+                dto.getOriginDepartment(),
                 dto.getDestinationCity(),
+                dto.getDestinationDepartment(),
                 dto.getWeight()
         );
 

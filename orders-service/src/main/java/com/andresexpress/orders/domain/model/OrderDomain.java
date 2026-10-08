@@ -22,7 +22,9 @@ public class OrderDomain {
     private String plainTrackingNumber;   // solo en memoria: NUNCA se guarda en BD
     private String hashedTrackingNumber;  // esto es lo que se guarda
     private String originCity;
+    private String originDepartment;
     private String destinationCity;
+    private String destinationDepartment;
     private Double weight;
     private ShipmentType shipmentType;
     private BigDecimal totalTariff;

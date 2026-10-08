@@ -3,6 +3,20 @@ Content-Type: application/json
 
 {
   "originCity": "Duitama",
+  "originDepartment": "Boyacá",
   "destinationCity": "tunja",
+  "destinationDepartment": "Boyacá",
   "weight": 3
+}
+
+### Municipio repetido: Rionegro existe en Antioquia y en Santander
+POST http://localhost:8081/api/v1/coverage/validate
+Content-Type: application/json
+
+{
+  "originCity": "Medellín",
+  "originDepartment": "Antioquia",
+  "destinationCity": "Rionegro",
+  "destinationDepartment": "Santander",
+  "weight": 1
 }

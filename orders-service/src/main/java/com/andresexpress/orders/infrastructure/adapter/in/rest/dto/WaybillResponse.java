@@ -6,7 +6,9 @@ import java.time.LocalDateTime;
 public record WaybillResponse(
         String trackingNumber,
         String originCity,
+        String originDepartment,
         String destinationCity,
+        String destinationDepartment,
         Double weight,
         String shipmentType,
         BigDecimal totalTariff,

@@ -18,6 +18,7 @@ coverage:
 api:
   colombia:
     url: ${API_COLOMBIA_URL:https://api-colombia.com/api/v1/City}
+    departments-url: ${API_COLOMBIA_DEPARTMENTS_URL:https://api-colombia.com/api/v1/Department}
     connect-timeout-ms: ${API_COLOMBIA_CONNECT_TIMEOUT_MS:5000}
     read-timeout-ms: ${API_COLOMBIA_READ_TIMEOUT_MS:15000}
     cache-minutes: ${API_COLOMBIA_CACHE_MINUTES:60}

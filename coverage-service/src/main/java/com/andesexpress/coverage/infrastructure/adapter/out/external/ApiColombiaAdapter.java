@@ -4,10 +4,10 @@ import com.andesexpress.coverage.application.port.out.ApiColombiaPort;
 import com.andesexpress.coverage.domain.exception.ExternalServiceUnavailableException;
 import com.andesexpress.coverage.domain.model.CityData;
 import com.andesexpress.coverage.infrastructure.adapter.out.external.dto.ApiColombiaCityResponseDTO;
+import com.andesexpress.coverage.infrastructure.adapter.out.external.dto.ApiColombiaDepartmentResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -23,10 +23,10 @@ import java.util.regex.Pattern;
 /**
  * Adaptador de salida hacia API Colombia.
  *
- * - Ciudad que no existe  -> Optional.empty()  (el servicio responde 404)
- * - API Colombia caida    -> ExternalServiceUnavailableException (el servicio responde 503)
- * - La lista de ciudades se guarda en memoria (cache) para no descargarla en cada pedido.
- *   Si API Colombia falla y ya hay una lista guardada, se usa esa.
+ * - Ciudad que no existe en ese departamento -> Optional.empty()  (el servicio responde 404)
+ * - API Colombia caida                       -> ExternalServiceUnavailableException (el servicio responde 503)
+ * - Las listas de ciudades y departamentos se guardan en memoria (cache), asi que validar
+ *   un pedido no llama a API Colombia. Si API Colombia falla y ya hay listas guardadas, se usan esas.
  */
 @Slf4j
 @Component
@@ -36,71 +36,66 @@ public class ApiColombiaAdapter implements ApiColombiaPort {
     private static final Pattern DISTRITO_CAPITAL = Pattern.compile(",?\\s*d\\.?\\s*c\\.?$");
 
     private final RestTemplate restTemplate;
-    private final String apiUrl;
+    private final String citiesUrl;
+    private final String departmentsUrl;
     private final Duration cacheTtl;
 
-    private volatile List<ApiColombiaCityResponseDTO> cachedCities;
+    private volatile Catalog cachedCatalog;
     private volatile Instant cacheLoadedAt;
 
     public ApiColombiaAdapter(RestTemplate restTemplate,
-                              @Value("${api.colombia.url:https://api-colombia.com/api/v1/City}") String apiUrl,
+                              @Value("${api.colombia.url:https://api-colombia.com/api/v1/City}") String citiesUrl,
+                              @Value("${api.colombia.departments-url:https://api-colombia.com/api/v1/Department}") String departmentsUrl,
                               @Value("${api.colombia.cache-minutes:60}") long cacheMinutes) {
         this.restTemplate = restTemplate;
-        this.apiUrl = apiUrl;
+        this.citiesUrl = citiesUrl;
+        this.departmentsUrl = departmentsUrl;
         this.cacheTtl = Duration.ofMinutes(cacheMinutes);
     }
 
     @Override
-    public Optional<CityData> fetchCityByName(String cityName) {
-        Optional<ApiColombiaCityResponseDTO> match = getCities().stream()
-                .filter(dto -> matchesCityName(dto.getName(), cityName))
+    public Optional<CityData> fetchCity(String cityName, String departmentName) {
+        Catalog catalog = getCatalog();
+
+        Optional<ApiColombiaDepartmentResponseDTO> department = catalog.departments().stream()
+                .filter(dto -> matchesName(dto.getName(), departmentName))
                 .findFirst();
-
-        if (match.isEmpty()) {
+        if (department.isEmpty()) {
             return Optional.empty();
         }
 
-        ApiColombiaCityResponseDTO detail;
-        try {
-            detail = restTemplate.getForObject(apiUrl + "/" + match.get().getId(), ApiColombiaCityResponseDTO.class);
-        } catch (HttpClientErrorException.NotFound e) {
-            return Optional.empty();
-        } catch (RestClientException e) {
-            log.error("API Colombia no respondio al consultar la ciudad {}: {}", cityName, e.getMessage());
-            throw new ExternalServiceUnavailableException("API Colombia no esta disponible en este momento");
-        }
-
-        if (detail == null) {
-            return Optional.empty();
-        }
-
-        return Optional.of(new CityData(
-                detail.getName(),
-                detail.getDepartment() != null ? detail.getDepartment().getName() : "Desconocido"
-        ));
+        Integer departmentId = department.get().getId();
+        return catalog.cities().stream()
+                .filter(dto -> departmentId.equals(dto.getDepartmentId()))
+                .filter(dto -> matchesName(dto.getName(), cityName))
+                .findFirst()
+                .map(city -> new CityData(city.getName(), department.get().getName()));
     }
 
-    private List<ApiColombiaCityResponseDTO> getCities() {
-        List<ApiColombiaCityResponseDTO> cities = cachedCities;
+    private Catalog getCatalog() {
+        Catalog catalog = cachedCatalog;
         Instant loadedAt = cacheLoadedAt;
-        if (cities != null && loadedAt != null && loadedAt.plus(cacheTtl).isAfter(Instant.now())) {
-            return cities;
+        if (catalog != null && loadedAt != null && loadedAt.plus(cacheTtl).isAfter(Instant.now())) {
+            return catalog;
         }
 
         try {
-            ApiColombiaCityResponseDTO[] response = restTemplate.getForObject(apiUrl, ApiColombiaCityResponseDTO[].class);
-            if (response == null) {
+            ApiColombiaCityResponseDTO[] cities = restTemplate.getForObject(citiesUrl, ApiColombiaCityResponseDTO[].class);
+            ApiColombiaDepartmentResponseDTO[] departments =
+                    restTemplate.getForObject(departmentsUrl, ApiColombiaDepartmentResponseDTO[].class);
+            if (cities == null || departments == null) {
                 throw new ExternalServiceUnavailableException("API Colombia respondio sin datos");
             }
-            cities = Arrays.asList(response);
-            cachedCities = cities;
+            catalog = new Catalog(Arrays.asList(cities), Arrays.asList(departments));
+            cachedCatalog = catalog;
             cacheLoadedAt = Instant.now();
-            log.info("Lista de ciudades de API Colombia cargada en cache: {} ciudades", cities.size());
-            return cities;
+            log.info("Listas de API Colombia cargadas en cache: {} ciudades, {} departamentos",
+                    cities.length, departments.length);
+            return catalog;
         } catch (RestClientException e) {
-            if (cachedCities != null) {
-                log.warn("API Colombia no respondio; se usa la lista de ciudades en cache. Detalle: {}", e.getMessage());
-                return cachedCities;
+            if (cachedCatalog != null) {
+                log.warn("API Colombia no respondio; se usan las listas en cache. Detalle: {}", e.getMessage());
+                return cachedCatalog;
             }
             log.error("API Colombia no respondio y no hay cache: {}", e.getMessage());
             throw new ExternalServiceUnavailableException("API Colombia no esta disponible en este momento");
@@ -111,17 +106,17 @@ public class ApiColombiaAdapter implements ApiColombiaPort {
      * Compara el nombre completo (RF-03, RN-05): un nombre parcial como "San" no debe
      * coincidir con "San Francisco".
      */
-    static boolean matchesCityName(String apiName, String requestedName) {
-        String normalizedRequestedName = normalizeCityName(requestedName);
+    static boolean matchesName(String apiName, String requestedName) {
+        String normalizedRequestedName = normalizeName(requestedName);
         return !normalizedRequestedName.isEmpty()
-                && normalizeCityName(apiName).equals(normalizedRequestedName);
+                && normalizeName(apiName).equals(normalizedRequestedName);
     }
 
     /**
      * Sin tildes, en minusculas y con espacios simples. Quita el sufijo "D.C." para que
      * "Bogota" coincida con "Bogotá D.C.", el unico nombre de API Colombia que lo trae.
      */
-    static String normalizeCityName(String input) {
+    static String normalizeName(String input) {
         if (input == null) {
             return "";
         }
@@ -131,5 +126,9 @@ public class ApiColombiaAdapter implements ApiColombiaPort {
                 .trim()
                 .replaceAll("\\s+", " ");
         return DISTRITO_CAPITAL.matcher(normalized).replaceAll("");
+    }
+
+    private record Catalog(List<ApiColombiaCityResponseDTO> cities,
+                           List<ApiColombiaDepartmentResponseDTO> departments) {
     }
 }

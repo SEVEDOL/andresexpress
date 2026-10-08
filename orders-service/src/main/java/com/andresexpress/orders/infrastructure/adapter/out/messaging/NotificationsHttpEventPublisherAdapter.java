@@ -50,7 +50,9 @@ public class NotificationsHttpEventPublisherAdapter implements EventPublisherPor
                 order.getRecipientName(),
                 order.getRecipientPhone(),
                 order.getOriginCity(),
+                order.getOriginDepartment(),
                 order.getDestinationCity(),
+                order.getDestinationDepartment(),
                 order.getWeight(),
                 order.getShipmentType() != null ? order.getShipmentType().name() : null,
                 order.getTotalTariff()
@@ -76,7 +78,9 @@ public class NotificationsHttpEventPublisherAdapter implements EventPublisherPor
             String recipientName,
             String recipientPhone,
             String originCity,
+            String originDepartment,
             String destinationCity,
+            String destinationDepartment,
             Double weight,
             String shipmentType,
             BigDecimal totalTariff) {

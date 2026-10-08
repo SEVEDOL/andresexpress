@@ -11,7 +11,13 @@ public class ValidateCoverageDTO {
     private String originCity;
 
     @NotBlank
+    private String originDepartment;
+
+    @NotBlank
     private String destinationCity;
+
+    @NotBlank
+    private String destinationDepartment;
 
     @NotNull
     @Positive

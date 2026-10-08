@@ -34,6 +34,8 @@ public class OrderPersistenceAdapter implements OrderRepositoryPort {
         e.setHashedTrackingNumber(d.getHashedTrackingNumber());
         e.setOriginCity(d.getOriginCity());
         e.setDestinationCity(d.getDestinationCity());
+        e.setOriginDepartment(d.getOriginDepartment());
+        e.setDestinationDepartment(d.getDestinationDepartment());
         e.setWeight(d.getWeight());
         e.setShipmentType(d.getShipmentType());
         e.setTotalTariff(d.getTotalTariff());
@@ -53,6 +55,8 @@ public class OrderPersistenceAdapter implements OrderRepositoryPort {
                 .hashedTrackingNumber(e.getHashedTrackingNumber())
                 .originCity(e.getOriginCity())
                 .destinationCity(e.getDestinationCity())
+                .originDepartment(e.getOriginDepartment())
+                .destinationDepartment(e.getDestinationDepartment())
                 .weight(e.getWeight())
                 .shipmentType(e.getShipmentType())
                 .totalTariff(e.getTotalTariff())

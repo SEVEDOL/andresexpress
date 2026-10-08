@@ -26,7 +26,9 @@ public class OrderCreatedEventCommand {
     private String recipientName;
     private String recipientPhone;
     private String originCity;
+    private String originDepartment;
     private String destinationCity;
+    private String destinationDepartment;
     private Double weight;
     private String shipmentType;
     private BigDecimal totalTariff;

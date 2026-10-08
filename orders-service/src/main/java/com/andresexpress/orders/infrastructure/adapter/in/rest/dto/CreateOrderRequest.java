@@ -8,7 +8,9 @@ import jakarta.validation.constraints.Positive;
 
 public record CreateOrderRequest(
         @NotBlank(message = "es obligatoria") String originCity,
+        @NotBlank(message = "es obligatorio") String originDepartment,
         @NotBlank(message = "es obligatoria") String destinationCity,
+        @NotBlank(message = "es obligatorio") String destinationDepartment,
         @NotNull(message = "es obligatorio") @Positive(message = "debe ser mayor que 0") Double weight,
         @NotNull(message = "es obligatorio (STANDARD o EXPRESS)") ShipmentType shipmentType,
         @NotBlank(message = "es obligatorio") String senderName,

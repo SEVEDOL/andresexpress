@@ -18,22 +18,26 @@ public class CoverageHttpAdapter implements CoverageServicePort {
     private final RestClient coverageRestClient;
 
     @Override
-    public TariffResult validateAndCalculateTariff(String originCity, String destinationCity, Double weight) {
+    public TariffResult validateAndCalculateTariff(String originCity, String originDepartment,
+                                                   String destinationCity, String destinationDepartment,
+                                                   Double weight) {
         try {
             CoverageResponse response = coverageRestClient.post()
                     .uri("/api/v1/coverage/validate")
-                    .body(new CoverageRequest(originCity, destinationCity, weight))
+                    .body(new CoverageRequest(originCity, originDepartment, destinationCity, destinationDepartment, weight))
                     .retrieve()
                     .body(CoverageResponse.class);
 
             if (response == null || response.totalTariff() == null) {
                 throw new CoverageUnavailableException("Coverage respondió sin tarifa");
             }
-            return new TariffResult(response.totalTariff());
+            return new TariffResult(response.originCity(), response.originDepartment(),
+                    response.destinationCity(), response.destinationDepartment(), response.totalTariff());
 
         } catch (HttpClientErrorException e) {
-            // 4xx: la ciudad no existe o los datos son inválidos
-            throw new InvalidCityException("La ciudad de origen o destino no existe");
+            // 4xx: la ciudad no existe en ese departamento o los datos son inválidos
+            throw new InvalidCityException(
+                    "La ciudad de origen o destino no existe en el departamento indicado");
         } catch (HttpServerErrorException | ResourceAccessException e) {
             // 5xx, timeout o Coverage apagado
             throw new CoverageUnavailableException("El servicio de cobertura no está disponible");
