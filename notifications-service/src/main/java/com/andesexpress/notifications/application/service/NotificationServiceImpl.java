@@ -17,7 +17,7 @@ public class NotificationServiceImpl implements SendNotificationUseCase {
     private final MailSenderPort mailSenderPort;
 
     @Override
-    public void processNotification(OrderCreatedEventCommand command) {
+    public boolean processNotification(OrderCreatedEventCommand command) {
         if (command.getEventId() == null || command.getEventId().isBlank()) {
             throw new IllegalArgumentException("El evento no trae eventId");
         }
@@ -27,7 +27,7 @@ public class NotificationServiceImpl implements SendNotificationUseCase {
         boolean registered = notificationRepositoryPort.tryRegister(command.getEventId(), command.getSenderEmail());
         if (!registered) {
             log.warn("El evento con ID {} ya fue procesado previamente. Descartando notificación duplicada.", command.getEventId());
-            return;
+            return false;
         }
 
         log.info("Procesando notificación para el evento ID: {}", command.getEventId());
@@ -42,6 +42,7 @@ public class NotificationServiceImpl implements SendNotificationUseCase {
 
         notificationRepositoryPort.markAsSent(command.getEventId());
         log.info("Evento ID {} registrado como enviado en el log de notificaciones.", command.getEventId());
+        return true;
     }
 
     /** Cuerpo del correo con la misma informacion de la guia (RF-10). */
