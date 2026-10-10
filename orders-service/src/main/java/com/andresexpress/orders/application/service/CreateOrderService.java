@@ -5,6 +5,7 @@ import com.andresexpress.orders.application.port.in.CreateOrderUseCase;
 import com.andresexpress.orders.application.port.out.CoverageServicePort;
 import com.andresexpress.orders.application.port.out.EventPublisherPort;
 import com.andresexpress.orders.application.port.out.OrderRepositoryPort;
+import com.andresexpress.orders.application.port.out.WaybillRequestPort;
 import com.andresexpress.orders.domain.model.OrderDomain;
 import com.andresexpress.orders.domain.model.TariffResult;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class CreateOrderService implements CreateOrderUseCase {
     private final CoverageServicePort coverageServicePort;
     private final OrderRepositoryPort orderRepositoryPort;
     private final EventPublisherPort eventPublisherPort;
+    private final WaybillRequestPort waybillRequestPort;
 
     @Override
     public OrderDomain createOrder(CreateOrderCommand command) {
@@ -52,6 +54,14 @@ public class CreateOrderService implements CreateOrderUseCase {
             eventPublisherPort.publishOrderCreated(order);
         } catch (Exception e) {
             log.error("No se pudo publicar el evento del pedido {}", order.getOrderId(), e);
+        }
+
+        // 5. Pedir la guía en PDF. Si falla, el pedido también queda creado (RN-10)
+        //    y el cliente puede regenerarla después con su número de guía (RF-09)
+        try {
+            waybillRequestPort.requestWaybill(order);
+        } catch (Exception e) {
+            log.error("No se pudo solicitar la guía en PDF del pedido {}", order.getOrderId(), e);
         }
 
         // Se devuelve 'order' (no lo que retorna save) porque es el único que tiene el número plano

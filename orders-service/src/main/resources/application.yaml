@@ -30,7 +30,17 @@ aws:
     # Local: http://localhost:9324 (ElasticMQ en Docker). En AWS se deja vacio.
     endpoint: ${SQS_ENDPOINT:}
     order-created-queue: ${ORDER_CREATED_QUEUE:order-created}
+    # Cola que dispara la Lambda de la guia en PDF (RF-07). Va aparte de la de Notifications
+    waybill-queue: ${WAYBILL_QUEUE:waybill-requests}
     create-queue: ${SQS_CREATE_QUEUE:true}
+  s3:
+    # Local: endpoint de un S3 simulado en Docker. En AWS se deja vacio.
+    endpoint: ${S3_ENDPOINT:}
+    # Bucket privado donde la Lambda guarda las guias; el nombre debe ser unico en todo AWS
+    waybill-bucket: ${WAYBILL_BUCKET:guias-envio-andesexpress}
+    waybill-prefix: ${WAYBILL_PREFIX:guias/}
+    # Minutos que dura la URL de descarga que se le entrega al cliente
+    url-minutes: ${WAYBILL_URL_MINUTES:15}
 
 # Solo se usa con events.publisher=http
 notifications:

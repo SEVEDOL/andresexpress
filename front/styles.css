@@ -51,8 +51,16 @@ button {
 button:hover { background-color: #2980b9; }
 button:disabled { background-color: #95a5a6; cursor: wait; }
 
+button.secondary { background-color: #fff; color: #3498db; border: 1px solid #3498db; }
+button.secondary:hover { background-color: #eef5fb; }
+button.secondary:disabled { background-color: #fff; color: #95a5a6; border-color: #95a5a6; }
+
 .inline-form { display: flex; gap: 10px; }
 .inline-form button { width: auto; margin-top: 0; }
+
+.actions { display: flex; gap: 10px; margin-top: 14px; }
+.actions button { margin-top: 0; }
+#pdfStatus { margin: 10px 0 0; min-height: 1em; }
 
 .result { margin-top: 16px; padding: 14px; border-radius: 4px; word-break: break-word; }
 .result.hidden { display: none; }
@@ -70,4 +78,5 @@ th { width: 40%; color: #555; }
 @media (max-width: 520px) {
     .row, .inline-form { flex-direction: column; gap: 0; }
     .inline-form button { width: 100%; margin-top: 8px; }
+    .actions { flex-direction: column; }
 }

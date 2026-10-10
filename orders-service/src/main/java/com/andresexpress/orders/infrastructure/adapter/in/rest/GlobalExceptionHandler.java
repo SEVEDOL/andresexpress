@@ -3,6 +3,8 @@ package com.andresexpress.orders.infrastructure.adapter.in.rest;
 import com.andresexpress.orders.domain.exception.CoverageUnavailableException;
 import com.andresexpress.orders.domain.exception.InvalidCityException;
 import com.andresexpress.orders.domain.exception.OrderNotFoundException;
+import com.andresexpress.orders.domain.exception.WaybillPdfNotReadyException;
+import com.andresexpress.orders.domain.exception.WaybillUnavailableException;
 import com.andresexpress.orders.infrastructure.adapter.in.rest.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,18 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CoverageUnavailableException.class)
     public ResponseEntity<ErrorResponse> coverageDown(CoverageUnavailableException e) {
+        return build(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
+    }
+
+    /** El pedido existe pero su PDF aun no: el cliente puede reintentar o regenerarlo (RF-09). */
+    @ExceptionHandler(WaybillPdfNotReadyException.class)
+    public ResponseEntity<ErrorResponse> waybillPdfNotReady(WaybillPdfNotReadyException e) {
+        return build(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler(WaybillUnavailableException.class)
+    public ResponseEntity<ErrorResponse> waybillUnavailable(WaybillUnavailableException e) {
+        log.error("Guia en PDF no disponible", e);
         return build(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
     }
 
